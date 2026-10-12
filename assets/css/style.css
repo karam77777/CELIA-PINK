@@ -2493,21 +2493,21 @@ input, select, textarea {
 }
 
 /* ==========================================================================
-   Coupon Code Buttons (Cart Drawer)
+   Coupon Code Buttons (Cart Drawer) - Ultra Compact Single Row
    ========================================================================== */
 .coupon-btns-label {
-  font-size: 0.8rem;
+  font-size: 0.74rem;
   font-weight: 700;
   color: var(--deep-pink);
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   text-align: center;
 }
 
 .coupon-btns-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 14px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
 }
 
 .coupon-btn {
@@ -2515,15 +2515,17 @@ input, select, textarea {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 10px 8px;
-  border-radius: var(--radius-md);
-  border: 2px solid var(--petal-pink);
+  gap: 2px;
+  padding: 6px 3px;
+  min-width: 0;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--petal-pink);
   background: var(--soft-pink);
   color: var(--deep-pink);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: inherit;
+  text-align: center;
 }
 
 .coupon-btn:hover:not(:disabled) {
@@ -2531,19 +2533,25 @@ input, select, textarea {
   color: white;
   border-color: var(--primary-pink);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.25);
+  box-shadow: 0 3px 10px rgba(236, 72, 153, 0.25);
 }
 
 .coupon-btn-code {
-  font-size: 0.82rem;
+  font-size: 0.70rem;
   font-weight: 900;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  line-height: 1.1;
 }
 
 .coupon-btn-desc {
-  font-size: 0.7rem;
+  font-size: 0.56rem;
   font-weight: 600;
-  opacity: 0.85;
+  opacity: 0.9;
+  line-height: 1.15;
+  text-align: center;
+  display: block;
+  word-break: break-word;
 }
 
 /* Active / applied state */
@@ -2551,21 +2559,62 @@ input, select, textarea {
   background: var(--deep-pink) !important;
   color: white !important;
   border-color: var(--deep-pink) !important;
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
 }
 
-.coupon-btn--active::after {
+.coupon-btn--active .coupon-btn-code::after {
   content: ' ✓';
   font-weight: 900;
+  font-size: 0.65rem;
 }
 
 /* Locked / not enough items */
 .coupon-btn--locked,
 .coupon-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.45;
   cursor: not-allowed;
   background: var(--gray-100);
   border-color: var(--gray-200);
   color: var(--text-muted);
+}
+
+/* Responsive for mobile & small screens */
+@media (max-width: 768px) {
+  .coupon-btns-label {
+    font-size: 0.70rem;
+    margin-bottom: 5px;
+  }
+  .coupon-btns-grid {
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .coupon-btn {
+    padding: 5px 2px;
+    border-radius: 6px;
+  }
+  .coupon-btn-code {
+    font-size: 0.64rem;
+    letter-spacing: 0;
+  }
+  .coupon-btn-desc {
+    font-size: 0.50rem;
+    line-height: 1.1;
+  }
+}
+
+@media (max-width: 380px) {
+  .coupon-btns-grid {
+    gap: 3px;
+  }
+  .coupon-btn {
+    padding: 4px 1px;
+  }
+  .coupon-btn-code {
+    font-size: 0.58rem;
+  }
+  .coupon-btn-desc {
+    font-size: 0.46rem;
+  }
 }
 
 /* ==========================================================================
@@ -2726,5 +2775,328 @@ input, select, textarea {
   /* Footer */
   .site-footer {
     padding: 45px 0 25px;
+  }
+}
+
+/* ==========================================================================
+   17. Floating Shopping Cart Button
+   ========================================================================== */
+.cart-float-container {
+  position: fixed;
+  bottom: 104px;
+  left: 28px;
+  z-index: 998;
+}
+
+.cart-float-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--grad-cta);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  box-shadow: 0 8px 25px rgba(255, 83, 118, 0.45);
+  position: relative;
+  transition: var(--transition-normal);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+}
+
+.cart-float-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 30px rgba(255, 83, 118, 0.65);
+}
+
+.cart-float-btn .action-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--white);
+  color: var(--deep-pink);
+  font-weight: 900;
+  border: 2px solid var(--deep-pink);
+  width: 24px;
+  height: 24px;
+  font-size: 0.78rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 768px) {
+  .cart-float-container {
+    bottom: 92px;
+    left: 20px;
+  }
+  .cart-float-btn {
+    width: 54px;
+    height: 54px;
+    font-size: 1.4rem;
+  }
+}
+
+/* ==========================================================================
+   18. Image Lightbox (تكبير الصور بحجمها الطبيعي)
+   ========================================================================== */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 5, 12, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  padding: 20px;
+}
+
+.lightbox-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.lightbox-container {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: zoomLightbox 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes zoomLightbox {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.lightbox-img {
+  max-width: 90vw;
+  max-height: 82vh;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  border: 2px solid var(--petal-pink);
+  background: var(--white);
+}
+
+.lightbox-close-btn {
+  position: absolute;
+  top: -16px;
+  left: -16px;
+  width: 42px;
+  height: 42px;
+  background: var(--white);
+  color: var(--deep-pink);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  z-index: 10;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.lightbox-close-btn:hover {
+  transform: scale(1.1);
+  background: var(--primary-pink);
+  color: white;
+}
+
+.lightbox-caption {
+  color: white;
+  margin-top: 12px;
+  font-weight: 800;
+  font-size: 1rem;
+  text-align: center;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+}
+
+/* Cursor indicator on product image for zoom */
+.product-image-container,
+.product-image-container img {
+  cursor: zoom-in !important;
+}
+
+/* ==========================================================================
+   19. Reviews System & Submission Form
+   ========================================================================== */
+.review-action-bar {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.btn-add-review {
+  background: var(--soft-pink);
+  color: var(--deep-pink);
+  border: 2px dashed var(--primary-pink);
+  border-radius: var(--radius-full);
+  padding: 12px 28px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition-normal);
+}
+
+.btn-add-review:hover {
+  background: var(--primary-pink);
+  color: white;
+  border-style: solid;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.review-form-card {
+  background: var(--white);
+  border: 1px solid var(--petal-pink);
+  border-radius: var(--radius-xl);
+  padding: 30px;
+  max-width: 680px;
+  margin: 0 auto 35px;
+  box-shadow: var(--shadow-md);
+  animation: slideDownFade 0.3s ease;
+}
+
+@keyframes slideDownFade {
+  from { opacity: 0; transform: translateY(-15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.review-form-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--dark-rose);
+  margin-bottom: 4px;
+}
+
+.review-form-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.review-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .review-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.review-field {
+  margin-bottom: 16px;
+}
+
+.review-field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--text-dark);
+}
+
+.review-field input,
+.review-field textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--petal-pink);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.9rem;
+  background: var(--soft-pink);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.review-field input:focus,
+.review-field textarea:focus {
+  border-color: var(--primary-pink);
+  background: var(--white);
+}
+
+.star-rating-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+}
+
+.star-btn {
+  font-size: 1.5rem;
+  color: var(--gray-200);
+  cursor: pointer;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.star-btn.active,
+.star-btn:hover {
+  color: #FFA41C;
+}
+
+.star-btn:hover {
+  transform: scale(1.2);
+}
+
+.star-rating-text {
+  font-weight: 700;
+  color: var(--deep-pink);
+  margin-right: 10px;
+  font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   20. Community Actions & Group Offer Centering on Mobile
+   ========================================================================== */
+.community-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .community-banner {
+    text-align: center;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 16px;
+  }
+
+  .community-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 15px auto 0;
+    gap: 12px;
+  }
+
+  .community-actions .btn-whatsapp-join,
+  .community-actions .group-offer-btn {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
   }
 }

@@ -56,3 +56,36 @@ INSERT INTO products (title, category, category_name, price, old_price, rating, 
 ('بيجامة كحلي كاروهات كلاسيك بياقة مبطنة وأزرار', 'classic', 'بيجامات كلاسيك زراير', 250, 350, 4.9, 44, 'تريند ثابت', 'hot', ARRAY['One Size'], 'assets/images/products/product-17.jpeg', 'الموديل الكلاسيكي الكحلي بكاروهات متناسقة وأزرار كاملة مع ياقة مبطنة.'),
 ('بيجامة ميلتون صفراء دافية بنقشة كتاكيت بيضاء كيوت', 'winter', 'فرو ومخمل شتوي', 250, 350, 5.0, 52, 'دفا ومرح 🐥', 'hot', ARRAY['One Size'], 'assets/images/products/product-18.jpeg', 'بيجامة شتوية صفراء مبهجة بخامة ميلتون قطيفة دافية جداً، طبعة كتاكيت بيضاء كيوت.'),
 ('بيجامة بيج مقلمة كلاسيك بنقشة تيدي بير وفيونكات', 'classic', 'بيجامات كلاسيك زراير', 250, 350, 5.0, 58, 'الأكثر طلباً للعرايس', 'hot', ARRAY['One Size'], 'assets/images/products/product-19.jpeg', 'بيجامة بيج مقلمة رفيع بنقشات تيدي بير وفيونكات بنية راقية، ياقة كلاسيك وأزرار أنيقة.');
+
+-- ====================================================
+-- 5. جدول آراء وتقييمات العملاء (Reviews Table)
+-- ====================================================
+CREATE TABLE IF NOT EXISTS reviews (
+  id          BIGSERIAL PRIMARY KEY,
+  name        TEXT          NOT NULL,
+  city        TEXT          DEFAULT 'القاهرة',
+  rating      INTEGER       NOT NULL DEFAULT 5,
+  comment     TEXT          NOT NULL,
+  created_at  TIMESTAMPTZ   DEFAULT NOW()
+);
+
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read reviews" ON reviews;
+CREATE POLICY "Allow public read reviews" ON reviews
+  FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow public insert reviews" ON reviews;
+CREATE POLICY "Allow public insert reviews" ON reviews
+  FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow anon delete reviews" ON reviews;
+CREATE POLICY "Allow anon delete reviews" ON reviews
+  FOR DELETE USING (true);
+
+-- إدخال التقييمات الترحيبية
+INSERT INTO reviews (name, city, rating, comment) VALUES
+('ميار عادل', 'التجمع الخامس (القاهرة)', 5, 'الخامة وهم بجد! الموهير ناعم زي الحرير وبيدفي من غير ما يتقل على الجسم خالص.. والتغليف شياكة موت كأني جايبة هدية لنفسي، تسلم إيديكم يا قمرات 💕'),
+('سلمى الشناوي', 'المعادي (القاهرة)', 5, 'أنا عروسة وكنت مجهزة نص لبس البيت من عندكم.. الموهير طري جداً وبيدفي ومبيوبرش في الغسيل، والمقاس الـ One Size جه مظبوط ومريح بالمللي، والديبوزت دفعته ع انستاباي بسهولة تامة.'),
+('نورهان مصطفى', 'مدينة نصر (القاهرة)', 5, 'التعامل على الواتساب سكر وزوق لأبعد حد! الأوردر وصلي بعد 48 ساعة بالظبط ، ده أول تعامل وأكيد مش الأخير.'),
+('ياسمين عبد العزيز', 'الشيخ زايد (الجيزة)', 5, 'بيجامة الكاروهات بالفيونكات خطييييرة! في اللبس فخمة أوي وكل صحباتي سألوني عنها، والخامة بجد مفهاش غلطة ومستنية الموديلات الجديدة تنزل!');

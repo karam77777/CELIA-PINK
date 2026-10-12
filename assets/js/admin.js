@@ -25,9 +25,10 @@ const CAT_NAMES = {
 // ==========================================
 // State
 // ==========================================
-let products  = [];
-let editingId = null;
-let deletingId = null;
+let products   = [];
+let reviews    = [];
+let editingId  = null;
+let deleteTarget = { type: 'product', id: null };
 
 // ==========================================
 // DB helpers (Supabase)
@@ -71,6 +72,32 @@ async function dbDeleteProduct(id) {
   if (error) throw error;
 }
 
+// Reviews DB Helpers
+async function dbFetchReviews() {
+  if (!isSupabaseReady()) return [];
+  try {
+    const { data, error } = await supabaseClient
+      .from('reviews')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) {
+      console.warn('Reviews fetch error:', error.message);
+      return [];
+    }
+    return data || [];
+  } catch(e) {
+    return [];
+  }
+}
+
+async function dbDeleteReview(id) {
+  const { error } = await supabaseClient
+    .from('reviews')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+}
+
 // ==========================================
 // Auth
 // ==========================================
@@ -98,6 +125,7 @@ function showAdminPanel() {
   document.getElementById('loginPage').style.display  = 'none';
   document.getElementById('adminPanel').style.display = 'block';
   loadProducts();
+  loadReviews();
 }
 
 document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
@@ -128,10 +156,106 @@ function showTableLoading(on) {
 // Stats
 // ==========================================
 function updateStats() {
-  document.getElementById('statTotal').textContent = products.length;
+  const statTotal = document.getElementById('statTotal');
+  if (statTotal) statTotal.textContent = products.length;
+
   const cats = new Set(products.map(p => p.category));
-  document.getElementById('statCats').textContent  = cats.size;
+  const statCats = document.getElementById('statCats');
+  if (statCats) statCats.textContent = cats.size;
+
+  const statReviews = document.getElementById('statReviews');
+  if (statReviews) statReviews.textContent = reviews.length;
+
+  const tabBadgeProducts = document.getElementById('tabBadgeProducts');
+  if (tabBadgeProducts) tabBadgeProducts.textContent = products.length;
+
+  const tabBadgeReviews = document.getElementById('tabBadgeReviews');
+  if (tabBadgeReviews) tabBadgeReviews.textContent = reviews.length;
 }
+
+// ==========================================
+// Tabs Switching
+// ==========================================
+window.switchAdminTab = function(tab) {
+  const pWrap = document.getElementById('productsSectionWrapper');
+  const rWrap = document.getElementById('reviewsSectionWrapper');
+  const pBtn  = document.getElementById('tabBtnProducts');
+  const rBtn  = document.getElementById('tabBtnReviews');
+
+  if (tab === 'products') {
+    if (pWrap) pWrap.style.display = 'block';
+    if (rWrap) rWrap.style.display = 'none';
+    if (pBtn) pBtn.classList.add('active');
+    if (rBtn) rBtn.classList.remove('active');
+  } else if (tab === 'reviews') {
+    if (pWrap) pWrap.style.display = 'none';
+    if (rWrap) rWrap.style.display = 'block';
+    if (rBtn) rBtn.classList.add('active');
+    if (pBtn) pBtn.classList.remove('active');
+    loadReviews();
+  }
+};
+
+// ==========================================
+// Load & Render Reviews
+// ==========================================
+async function loadReviews() {
+  const tbody = document.getElementById('reviewsTableBody');
+  if (tbody) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--gray);">
+      <i class="fas fa-spinner fa-spin" style="font-size:1.5rem;color:var(--petal);"></i>
+      <p style="margin-top:8px;">جاري تحميل التعليقات...</p>
+    </td></tr>`;
+  }
+  reviews = await dbFetchReviews();
+  updateStats();
+  renderReviewsTable();
+}
+
+window.renderReviewsTable = function() {
+  const searchInput = document.getElementById('searchReviewsInput');
+  const search = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+  const filtered = reviews.filter(r => {
+    return (r.name || '').toLowerCase().includes(search) ||
+           (r.comment || '').toLowerCase().includes(search) ||
+           (r.city || '').toLowerCase().includes(search);
+  });
+
+  const tbody = document.getElementById('reviewsTableBody');
+  if (!tbody) return;
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7">
+      <div class="empty-state">
+        <i class="fas fa-comments"></i>
+        <p>لا توجد تعليقات مطابقة 🌸</p>
+      </div>
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((r, i) => {
+    const stars = '⭐'.repeat(r.rating || 5);
+    const dateStr = r.created_at ? new Date(r.created_at).toLocaleDateString('ar-EG') : 'الآن';
+
+    return `
+      <tr>
+        <td style="color:var(--gray);font-size:0.82rem;">${i + 1}</td>
+        <td style="font-weight:700;">${r.name || 'عميل'}</td>
+        <td><span class="badge-cat">${r.city || 'القاهرة'}</span></td>
+        <td>${stars}</td>
+        <td style="max-width:320px; line-height:1.5;">${r.comment || ''}</td>
+        <td style="color:var(--gray); font-size:0.82rem;">${dateStr}</td>
+        <td style="white-space:nowrap;">
+          <button class="btn-delete" onclick="openDeleteReviewModal(${r.id})">
+            <i class="fas fa-trash-alt"></i> حذف التعليق
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
 
 // ==========================================
 // Render Table
@@ -305,28 +429,52 @@ async function saveProduct() {
 }
 
 // ==========================================
-// Delete
+// Delete Operations (Products & Reviews)
 // ==========================================
-function openDeleteModal(id) {
-  deletingId = id;
+window.openDeleteModal = function(id) {
+  deleteTarget = { type: 'product', id };
+  const title = document.getElementById('deleteModalTitle');
+  const text  = document.getElementById('deleteModalText');
+  if (title) title.textContent = 'تأكيد حذف المنتج';
+  if (text)  text.textContent  = 'هتحذفي المنتج ده من المتجر تماماً. مش هتقدري ترجعيه تاني!';
   document.getElementById('deleteModal').classList.add('open');
-}
+};
+
+window.openDeleteReviewModal = function(id) {
+  deleteTarget = { type: 'review', id };
+  const title = document.getElementById('deleteModalTitle');
+  const text  = document.getElementById('deleteModalText');
+  if (title) title.textContent = 'تأكيد حذف التعليق';
+  if (text)  text.textContent  = 'هل أنتِ متأكدة من حذف هذا التعليق؟ سيتم مسحه فوراً ولن يظهر في المتجر.';
+  document.getElementById('deleteModal').classList.add('open');
+};
+
 function closeDeleteModal() {
   document.getElementById('deleteModal').classList.remove('open');
-  deletingId = null;
+  deleteTarget = { type: 'product', id: null };
 }
+
 async function confirmDelete() {
-  if (deletingId === null) return;
+  if (!deleteTarget.id) return;
   const btn = document.querySelector('.btn-delete-confirm');
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
   try {
-    await dbDeleteProduct(deletingId);
-    closeDeleteModal();
-    adminToast('🗑️ تم حذف المنتج بنجاح', 'success');
-    await loadProducts();
+    if (deleteTarget.type === 'product') {
+      await dbDeleteProduct(deleteTarget.id);
+      closeDeleteModal();
+      adminToast('🗑️ تم حذف المنتج بنجاح', 'success');
+      await loadProducts();
+    } else if (deleteTarget.type === 'review') {
+      await dbDeleteReview(deleteTarget.id);
+      closeDeleteModal();
+      adminToast('🗑️ تم حذف التعليق بنجاح من المتجر', 'success');
+      await loadReviews();
+    }
   } catch(err) {
     adminToast('❌ خطأ في الحذف: ' + err.message, 'error');
+  } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-trash-alt"></i> حذف نهائي';
   }

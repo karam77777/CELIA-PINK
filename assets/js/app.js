@@ -407,6 +407,9 @@ let appliedDiscountCode = ''; // current active coupon code
             <button class="quick-action-btn quick-view-btn" data-id="${product.id}" title="نظرة سريعة">
               <i class="far fa-eye"></i>
             </button>
+            <button class="quick-action-btn zoom-lightbox-btn" data-img="${product.image}" data-title="${product.title}" title="تكبير الصورة بحجمها الطبيعي">
+              <i class="fas fa-search-plus"></i>
+            </button>
           </div>
 
           <!-- Pink Aesthetic Image Container with Unified Tone Filter -->
@@ -465,6 +468,11 @@ let appliedDiscountCode = ''; // current active coupon code
     if (cartBadge) {
       cartBadge.textContent = totalItems;
       cartBadge.style.display = totalItems > 0 ? 'flex' : 'none';
+    }
+    const floatingCartBadge = document.getElementById('floatingCartBadge');
+    if (floatingCartBadge) {
+      floatingCartBadge.textContent = totalItems;
+      floatingCartBadge.style.display = totalItems > 0 ? 'flex' : 'none';
     }
 
     // ---- 3. Empty cart state ----
@@ -673,6 +681,25 @@ let appliedDiscountCode = ''; // current active coupon code
         openQuickView(id);
       };
     });
+
+    // Zoom Lightbox Buttons
+    document.querySelectorAll('.zoom-lightbox-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        openLightbox(btn.dataset.img, btn.dataset.title);
+      };
+    });
+
+    // Clicking Product Image directly opens Lightbox
+    document.querySelectorAll('.product-image-container').forEach(container => {
+      container.onclick = (e) => {
+        if (e.target.closest('.quick-action-btn') || e.target.closest('.product-badge')) return;
+        const img = container.querySelector('img');
+        const card = container.closest('.product-card');
+        const title = card ? card.querySelector('.product-title')?.textContent : '';
+        if (img) openLightbox(img.src, title);
+      };
+    });
   }
 
   // Category Filter Tabs
@@ -703,6 +730,11 @@ let appliedDiscountCode = ''; // current active coupon code
   // ==========================================
   if (cartBtn) {
     cartBtn.onclick = () => cartOverlay.classList.add('open');
+  }
+
+  const floatingCartBtn = document.getElementById('floatingCartBtn');
+  if (floatingCartBtn) {
+    floatingCartBtn.onclick = () => cartOverlay.classList.add('open');
   }
 
   if (closeCartBtn) {
@@ -830,7 +862,7 @@ let appliedDiscountCode = ''; // current active coupon code
     const modalBody = document.getElementById('quickViewContent');
     modalBody.innerHTML = `
       <div class="qv-modal-grid">
-        <div class="pink-filter-container qv-modal-img-wrap" style="border-radius: var(--radius-lg);">
+        <div class="pink-filter-container qv-modal-img-wrap" style="border-radius: var(--radius-lg); cursor: zoom-in;" onclick="openLightbox('${prod.image}', '${prod.title}')" title="اضغطي لتكبير الصورة بحجمها الطبيعي">
           <img src="${prod.image}" alt="${prod.title}" class="pink-filtered-img">
           <div class="pink-filter-overlay"></div>
         </div>
@@ -1027,7 +1059,195 @@ let appliedDiscountCode = ''; // current active coupon code
     }
   } catch(e) {}
 
-  // Initialize – load from Supabase first, fallback to hardcoded
+  // ==========================================
+  // 15. Image Lightbox Modal Logic (تكبير الصور بحجمها الطبيعي)
+  // ==========================================
+  const imageLightbox = document.getElementById('imageLightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxCaption = document.getElementById('lightboxCaption');
+  const closeLightboxBtn = document.getElementById('closeLightboxBtn');
+
+  window.openLightbox = function(src, caption = '') {
+    if (!imageLightbox || !lightboxImg) return;
+    lightboxImg.src = src;
+    if (lightboxCaption) lightboxCaption.textContent = caption;
+    imageLightbox.classList.add('open');
+  };
+
+  function closeLightbox() {
+    if (imageLightbox) imageLightbox.classList.remove('open');
+  }
+
+  if (closeLightboxBtn) closeLightboxBtn.onclick = closeLightbox;
+  if (imageLightbox) {
+    imageLightbox.onclick = (e) => {
+      if (e.target === imageLightbox) closeLightbox();
+    };
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+  // ==========================================
+  // 16. Customer Reviews System (Exclusively from Supabase Cloud DB)
+  // ==========================================
+  let currentRating = 5;
+
+  window.toggleReviewForm = function() {
+    const card = document.getElementById('reviewFormCard');
+    if (!card) return;
+    const isHidden = card.style.display === 'none' || card.style.display === '';
+    card.style.display = isHidden ? 'block' : 'none';
+    if (isHidden) {
+      document.getElementById('revName')?.focus();
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  };
+
+  function initStarSelector() {
+    const starBtns = document.querySelectorAll('.star-btn');
+    const textEl = document.getElementById('starRatingText');
+    const labels = {
+      1: '1 من 5 - عادي',
+      2: '2 من 5 - مقبول',
+      3: '3 من 5 - حلو',
+      4: '4 من 5 - ممتاز جداً',
+      5: '5 من 5 - تحفة وممتاز جداً! 💕'
+    };
+
+    starBtns.forEach(star => {
+      star.onclick = () => {
+        currentRating = parseInt(star.dataset.rating);
+        starBtns.forEach(s => {
+          const r = parseInt(s.dataset.rating);
+          s.classList.toggle('active', r <= currentRating);
+        });
+        if (textEl) textEl.textContent = labels[currentRating] || `${currentRating} من 5`;
+      };
+    });
+  }
+
+  function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function renderReviews(list) {
+    const container = document.getElementById('reviewsGrid');
+    if (!container) return;
+
+    if (!Array.isArray(list) || list.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: var(--text-muted); background: white; border-radius: var(--radius-lg); border: 2px dashed #FCE7F3;">
+          <i class="fas fa-heart" style="color: var(--primary-color); font-size: 2.2rem; margin-bottom: 12px; display: block;"></i>
+          <p style="font-weight: 700; font-size: 1.05rem; color: var(--text-dark); margin-bottom: 6px;">لا توجد تعليقات حالياً</p>
+          <span style="font-size: 0.88rem;">شاركينا رأيك الجميل في بيجامات CELIA PINK وكوني أول من يضع تقييماً! 🌸</span>
+        </div>
+      `;
+      return;
+    }
+
+    const colors = [
+      'linear-gradient(135deg, #FF6584, #FFA8BA)',
+      'linear-gradient(135deg, #C2185B, #E91E63)',
+      'linear-gradient(135deg, #9C27B0, #E91E63)',
+      'linear-gradient(135deg, #E91E63, #FF80AB)',
+      'linear-gradient(135deg, #FF4081, #FF80AB)'
+    ];
+
+    container.innerHTML = list.map((rev, idx) => {
+      const avatarLetter = (rev.name || 'ع').trim().charAt(0);
+      const bg = colors[idx % colors.length];
+      const starsHtml = Array.from({ length: 5 }, (_, i) => 
+        `<i class="fas fa-star" style="color: ${i < (rev.rating || 5) ? '#FFA41C' : '#E5E7EB'};"></i>`
+      ).join('');
+
+      return `
+        <div class="review-card">
+          <i class="fas fa-quote-right quote-icon"></i>
+          <div class="review-header">
+            <div class="reviewer-avatar" style="background: ${bg};">${avatarLetter}</div>
+            <div>
+              <h4 class="reviewer-name">${escapeHTML(rev.name)}</h4>
+              <span class="reviewer-badge"><i class="fas fa-check-circle"></i> ${escapeHTML(rev.city || 'القاهرة')}</span>
+            </div>
+          </div>
+          <div class="review-stars">
+            ${starsHtml}
+          </div>
+          <p class="review-text">
+            "${escapeHTML(rev.comment)}"
+          </p>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function loadReviewsFromSupabase() {
+    let reviewsList = [];
+
+    try {
+      if (typeof isSupabaseReady === 'function' && isSupabaseReady()) {
+        const { data, error } = await supabaseClient
+          .from('reviews')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (!error && Array.isArray(data)) {
+          reviewsList = data;
+        }
+      }
+    } catch(e) {
+      console.warn('Reviews fetch error:', e);
+    }
+
+    renderReviews(reviewsList);
+  }
+
+  window.handleReviewSubmit = async function(e) {
+    e.preventDefault();
+    const name = document.getElementById('revName').value.trim();
+    const city = document.getElementById('revCity').value.trim() || 'القاهرة';
+    const comment = document.getElementById('revComment').value.trim();
+    const submitBtn = document.getElementById('submitReviewBtn');
+
+    if (!name || !comment) {
+      showToast('من فضلك اكتبي اسمك ورأيك يا سكر');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري النشر...';
+
+    const newRev = { name, city, rating: currentRating, comment };
+
+    try {
+      if (typeof isSupabaseReady === 'function' && isSupabaseReady()) {
+        const { error } = await supabaseClient.from('reviews').insert([newRev]);
+        if (error) throw error;
+      }
+      showToast('🎉 شكراً ليكي يا سكر! تم نشر رأيك الجميل 💕');
+      document.getElementById('newReviewForm').reset();
+      toggleReviewForm();
+      await loadReviewsFromSupabase();
+    } catch(err) {
+      console.warn('Could not save to Supabase:', err.message);
+      showToast('حدث خطأ أثناء حفظ الرأي، يرجى المحاولة مرة أخرى');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> نشر الريفيو فوراً';
+    }
+  };
+
+  // Initialize
   loadProductsFromSupabase();  // async: renders products after cloud fetch
   updateWishlistUI();
+  initStarSelector();
+  loadReviewsFromSupabase();
 });
+
