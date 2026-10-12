@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CELIA PINK | متجر بيجامات نسائية ودلع بيتي أونلاين 🌸</title>
+  <meta name="description" content="متجر CELIA PINK أونلاين - كولكشن بيجامات نسائية راقية، ستان وكلاسيك زراير، قطن مصري 100%، وأطقم بيتي شيك بأفضل الأسعار ودفع سهل عبر انستاباي وفودافون كاش.">
+
+  <!-- Security Hardening Headers -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%3E<text y=%2226%22 font-size=%2224%22>🌸</text></svg>">
+
+  <!-- Google Fonts: Tajawal & Playfair Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- ==========================================
+       1. Top Announcement Bar
+       ========================================== -->
+  <div class="top-bar">
+    <div class="container top-bar-content">
+      <div class="top-bar-message">
+        <span>🎀 شحن مجاني لأي أوردر فوق الـ 1000 جنيه في كل محافظات مصر!</span>
+        <span class="top-bar-badge">كود خصم: CELIA10 لخصم 10% 🌸</span>
+      </div>
+      <div class="top-bar-actions">
+        <span>💳 دفع سهل: انستاباي | فودافون كاش | اتصالات كاش</span>
+        <a href="https://wa.me/201505583219" target="_blank" rel="noopener noreferrer" style="color: white; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; font-weight: 700;">
+          <i class="fab fa-whatsapp"></i> تواصل للطلبات عبر الواتساب
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       2. Site Header & Navigation
+       ========================================== -->
+  <header class="site-header">
+    <div class="container header-main">
+      <!-- Clean Brand Logo Container (No Placeholder Box) -->
+      <a href="#home" class="logo-container" id="brandLogoContainer" style="text-decoration: none;">
+        <div class="brand-text">
+          <span class="brand-title">CELIA PINK</span>
+          <span class="brand-tagline">بيجامات بيتي بناتي وشياكة في البيت 🌸</span>
+        </div>
+      </a>
+
+      <!-- Navigation Menu -->
+      <nav class="nav-menu">
+        <a href="#home" class="nav-link active">الرئيسية</a>
+        <a href="#productsSection" class="nav-link">
+          كولكشن البيجامات
+          <span class="nav-badge-new">NEW</span>
+        </a>
+        <a href="#categoriesSection" class="nav-link">الأقسام</a>
+        <a href="#paymentSection" class="nav-link">طرق الدفع والديبوزت</a>
+        <a href="#promoSection" class="nav-link">العروض الحصرية</a>
+        <a href="#reviewsSection" class="nav-link">آراء الجميلات</a>
+        <a href="#footerSection" class="nav-link">تواصل معنا</a>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="header-actions">
+        <!-- Direct WhatsApp Chat Link Button -->
+        <a href="https://wa.me/201505583219" target="_blank" rel="noopener noreferrer" class="action-btn" title="تواصل مباشر عبر الواتساب" style="background: #E8F5E9; color: var(--whatsapp-green);">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+
+        <!-- Wishlist Button -->
+        <button class="action-btn" id="wishlistBtn" title="المفضلة" onclick="document.getElementById('productsSection').scrollIntoView({behavior: 'smooth'})">
+          <i class="far fa-heart"></i>
+          <span class="action-badge" id="wishlistBadge" style="display: none;">0</span>
+        </button>
+
+        <!-- Cart Button -->
+        <button class="action-btn" id="cartBtn" title="سلة المشتريات">
+          <i class="fas fa-shopping-bag"></i>
+          <span class="action-badge" id="cartBadge" style="display: none;">0</span>
+        </button>
+
+        <!-- Mobile Toggle Button -->
+        <button class="mobile-toggle" id="mobileToggleBtn" title="القائمة">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer Menu -->
+  <div class="modal-overlay" id="mobileNavMenu">
+    <div class="modal-card" style="max-width: 320px; text-align: center;">
+      <button class="modal-close-btn" id="closeMobileNav">&times;</button>
+      <div style="margin-bottom: 25px;">
+        <h3 class="brand-title" style="font-size: 1.8rem;">CELIA PINK</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">بيجامات بيتي بناتي ودلع نسائي 🌸</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 16px; font-weight: 700;">
+        <a href="#home" onclick="document.getElementById('mobileNavMenu').classList.remove('open')">الرئيسية</a>
+        <a href="#productsSection" onclick="document.getElementById('mobileNavMenu').classList.remove('open')">كولكشن البيجامات (19 موديل)</a>
+        <a href="#categoriesSection" onclick="document.getElementById('mobileNavMenu').classList.remove('open')">أقسام البيجامات</a>
+        <a href="#paymentSection" onclick="document.getElementById('mobileNavMenu').classList.remove('open')">طرق الدفع والديبوزت</a>
+        <a href="#promoSection" onclick="document.getElementById('mobileNavMenu').classList.remove('open')">العروض الحصرية</a>
+        <a href="#reviewsSection" onclick="document.getElementById('mobileNavMenu').classList.remove('open')">آراء وتجارب البنات</a>
+        <a href="https://wa.me/201505583219" target="_blank" style="color: var(--whatsapp-green);"><i class="fab fa-whatsapp"></i> تواصل مباشر للطلبات</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       3. Hero Section (مع صورة Cover.jpg الحصرية)
+       ========================================== -->
+  <section class="hero-section" id="home">
+    <div class="hero-shapes">
+      <div class="shape-bubble bubble-1"></div>
+      <div class="shape-bubble bubble-2"></div>
+      <div class="shape-bubble bubble-3"></div>
+    </div>
+
+    <div class="container hero-grid">
+      <!-- Hero Text Content -->
+      <div class="hero-content">
+        <div class="hero-badge-pill">
+          <i class="fas fa-sparkles" style="color: var(--primary-pink);"></i>
+          <span>يا مساء الروقان والدلع يا قمر.. كولكشن 2026 وصل 💕</span>
+        </div>
+
+        <h1 class="hero-title">
+          شياكتك وراحتك في البيت بتبدأ مع <span class="highlight">CELIA PINK</span>
+        </h1>
+
+        <p class="hero-description">
+          بيجامات نسائية صُممت مخصوص عشان تدلعي نفسك! خامات موهير فاخرة تطبطب على جسمك بنعومة حريرية، وكلاسيك زراير شيك، وكولكشن شتوي دافي بلمعان وفخامة الموهير الألماسية.. مع تغليف هدايا راقي يوصلك لحد باب بيتك في أي مكان في مصر.
+        </p>
+
+        <div class="hero-buttons">
+          <a href="#productsSection" class="btn-primary">
+            <i class="fas fa-shopping-bag"></i>
+            <span>تسوقي كولكشن البيجامات</span>
+          </a>
+          <a href="https://wa.me/201505583219" target="_blank" rel="noopener noreferrer" class="btn-secondary">
+            <i class="fab fa-whatsapp"></i>
+            <span>اطلبي مباشرة عبر الواتساب</span>
+          </a>
+        </div>
+
+        <!-- Quick Trust Highlights -->
+        <div class="hero-highlights">
+          <div class="highlight-item">
+            <div class="highlight-icon">
+              <i class="fas fa-truck-fast"></i>
+            </div>
+            <div class="highlight-info">
+              <h4>شحن مجاني فوق 1000 ج</h4>
+              <p>توصيل لباب بيتك بكل المحافظات</p>
+            </div>
+          </div>
+
+          <div class="highlight-item">
+            <div class="highlight-icon">
+              <i class="fas fa-credit-card"></i>
+            </div>
+            <div class="highlight-info">
+              <h4>انستاباي ومحافظ كاش</h4>
+              <p>دفع ديبوزت سهل لجدية الحجز</p>
+            </div>
+          </div>
+
+          <div class="highlight-item">
+            <div class=icon">
+            </div>
+            <div class="highlight-info"> 
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Visual Showcase Card With Cover.jpg -->
+      <div class="hero-visual-card">
+        <div class="floating-hero-badge badge-top-right">
+          <div class="badge-icon">
+            <i class="fas fa-certificate"></i>
+          </div>
+          <div>
+            <div class="badge-text-title">خامات موهير فخم</div>
+            <div class="badge-text-sub">واحدة من أفخم الألياف الطبيعية في عالم المنسوجات</div>
+          </div>
+        </div>
+
+        <!-- Cover.jpg Studio Image -->
+        <div class="hero-main-img-box">
+          <img src="assets/images/Cover.jpg" alt="CELIA PINK Pajamas Collection">
+        </div>
+
+        <!-- Clickable WhatsApp Hero Badge (No Plain Phone Number) -->
+        <a href="https://wa.me/201505583219" target="_blank" rel="noopener noreferrer" class="floating-hero-badge badge-bottom-left" style="text-decoration: none; color: inherit;">
+          <div class="badge-icon" style="background: var(--whatsapp-green);">
+            <i class="fab fa-whatsapp"></i>
+          </div>
+          <div>
+            <div class="badge-text-title">طلبات فورية عبر الواتساب</div>
+            <div class="badge-text-sub">اضغطي هنا لبدء محادثة سريعة 💬</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       4. Store Features Section
+       ========================================== -->
+  <section class="features-section">
+    <div class="container">
+      <div class="features-grid">
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <i class="fas fa-truck-fast"></i>
+          </div>
+          <h3 class="feature-title">شحن مجاني فوق 1000 ج</h3>
+          <p class="feature-desc">جمعي أوردرك فوق الألف جنيه وهتاخدي شحن مجاني تماماً للقاهرة، الجيزة، والإسكندرية وكل المحافظات.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <i class="fas fa-money-bill-transfer"></i>
+          </div>
+          <h3 class="feature-title">دفع سهل وديبوزت بسيط</h3>
+          <p class="feature-desc">ادفعي ديبوزت تأكيد الحجز على انستاباي أو محافظ الكاش، والباقي عند الاستلام لما تعايني براحتك.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon-wrapper">
+            <i class="fas fa-heart"></i>
+          </div>
+          <h3 class="feature-title">خامات مظبوطة بالمللي</h3>
+          <p class="feature-desc">مقاس موحد (One Size) مريح بيلبس لحد وزن 120 كيلو، مع تقفيل وخياطة احترافية مرنة تناسب جسمك وتضمن راحتك التامة في البيت.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       5. Categories Section
+       ========================================== -->
+  <section class="categories-section" id="categoriesSection">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">اختاري نوع البيجامة اللي يناسب مودك🌸</h2>
+        <p class="section-subtitle">من الكلاسيك بالأزرار لمظهر الموهير المريح والكاروهات، كل ستايل له لمسة دلع خاصة بيه.</p>
+      </div>
+
+      <div class="categories-grid">
+        <div class="category-card" data-category="cotton">
+          <div class="category-avatar">☁️</div>
+          <h3 class="category-name">موهير بيتي دلع</h3>
+          <span class="category-count">خامات ناعمة ومريحة</span>
+        </div>
+
+        <div class="category-card" data-category="classic">
+          <div class="category-avatar">✨</div>
+          <h3 class="category-name">كلاسيك زراير</h3>
+          <span class="category-count">ياقة شيك وأزرار صدفية</span>
+        </div>
+
+        <div class="category-card" data-category="plaid">
+          <div class="category-avatar">🎀</div>
+          <h3 class="category-name">كاروهات وتريند</h3>
+          <span class="category-count">أحدث نقشات وموديلات</span>
+        </div>
+
+        <div class="category-card" data-category="winter">
+          <div class="category-avatar">❄️</div>
+          <h3 class="category-name">فرو ومخمل شتوي</h3>
+          <span class="category-count">بونشو وأطقم موهير دافية وفخمة</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       6. Products Showcase (عرض المنتجات الـ 19 بالفلتر الوردي)
+       ========================================== -->
+  <section class="products-section" id="productsSection">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">أحدث وأشيك البيجامات✨</h2>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-nav">
+        <button class="filter-btn active" data-filter="all">كل البيجامات</button>
+        <button class="filter-btn" data-filter="cotton">موهير بيتي دلع</button>
+        <button class="filter-btn" data-filter="classic">بيجامات كلاسيك زراير</button>
+        <button class="filter-btn" data-filter="plaid">كاروهات وتريند</button>
+        <button class="filter-btn" data-filter="winter">فرو ومخمل شتوي</button>
+      </div>
+
+      <!-- Products Grid (Rendered Dynamically by app.js with pink filter) -->
+      <div class="products-grid" id="productsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       7. Payment Methods & Deposit Notice Section
+       ========================================== -->
+  <section class="payment-section" id="paymentSection">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">طرق الدفع وتأكيد الحجز</span>
+        <h2 class="section-title">طرق دفع سهلة وسريعة تناسبك 💳</h2>
+        <p class="section-subtitle">بنقدملك أسهل وسائل الدفع الإلكتروني في مصر لتأكيد أوردرك في دقايق</p>
+      </div>
+
+      <div class="payment-methods-grid">
+        <!-- InstaPay -->
+        <div class="payment-card instapay">
+          <div class="payment-card-icon">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <h3 class="payment-card-title">انستا باي (InstaPay)</h3>
+          <p class="payment-card-sub">دفع لحظي ومباشر من حسابك البنكي أو بطاقة ميزة بدون أي عمولات إضافية.</p>
+        </div>
+
+        <!-- Vodafone Cash -->
+        <div class="payment-card vodafone">
+          <div class="payment-card-icon">
+            <i class="fas fa-mobile-screen"></i>
+          </div>
+          <h3 class="payment-card-title">فودافون كاش</h3>
+          <p class="payment-card-sub">تحويل فوري وسهل من محفظتك برقم مباشر بنبعتهولك على الواتساب فور الطلب.</p>
+        </div>
+
+        <!-- Etisalat Cash -->
+        <div class="payment-card etisalat">
+          <div class="payment-card-icon">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <h3 class="payment-card-title">اتصالات كاش</h3>
+          <p class="payment-card-sub">متاح التحويل في أي وقت على مدار اليوم من محفظة اتصالات كاش الخاصة بكِ.</p>
+        </div>
+
+        <!-- Cash on Delivery -->
+        <div class="payment-card cod">
+          <div class="payment-card-icon">
+            <i class="fas fa-hand-holding-dollar"></i>
+          </div>
+          <h3 class="payment-card-title">الدفع عند الاستلام</h3>
+          <p class="payment-card-sub">استلمي أوردرك من مندوب الشحن وعايني خامتك براحتك وادفعي باقي الحساب.</p>
+        </div>
+      </div>
+
+      <!-- Deposit Notice Card -->
+      <div class="deposit-notice-card">
+        <div class="deposit-notice-icon">
+          <i class="fas fa-shield-heart"></i>
+        </div>
+        <div class="deposit-notice-content">
+          <h4>
+            📌 ملحوظة هامة بخصوص ديبوزت جدية الحجز (Booking Deposit):
+            <span class="deposit-highlight-badge">لضمان المصداقية</span>
+          </h4>
+          <p>
+            حبيبتي، لأن كل قطعة بيجامة بتتحجز مخصوص ليكي ، 
+            <strong>بيتم دفع ديبوزت رمزي (100 جنيه أو قيمة مصاريف الشحن) لتأكيد جدية الحجز</strong> 
+            عبر انستاباي أو فودافون كاش أو اتصالات كاش، <strong>وباقي ثمن الأوردر بتدفعيه عند الاستلام لباب البيت</strong> بعد ما تستلمي وتطمني. 🌸
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       8. Special Promo Offer / Countdown Banner
+       ========================================== -->
+  <section class="promo-section" id="promoSection">
+    <div class="container">
+      <div class="promo-box">
+        <div class="promo-text-side">
+          <span class="promo-tag">عرض العرايس والأصدقاء الحصري ⏳</span>
+          <h2 class="promo-title">اطلبي دسته بيجامات واحصلي على خصم 24% </h2>
+          <p class="promo-desc">
+            اختاري أي 12 من كولكشن البيجامات واحصلي على كود خصم 24% + شحن مجاناً لباب البيت!
+          </p>
+
+          <div class="countdown-wrapper">
+            <div class="timer-box">
+              <div class="timer-num" id="timerHours">18</div>
+              <div class="timer-label">ساعة</div>
+            </div>
+            <div class="timer-box">
+              <div class="timer-num" id="timerMinutes">45</div>
+              <div class="timer-label">دقيقة</div>
+            </div>
+            <div class="timer-box">
+              <div class="timer-num" id="timerSeconds">00</div>
+              <div class="timer-label">ثانية</div>
+            </div>
+          </div>
+
+          <a href="#productsSection" class="btn-primary">
+            <i class="fas fa-shopping-bag"></i>
+            <span>اختاري بيجاماتك واستفيدي من العرض</span>
+          </a>
+        </div>
+
+        <div class="promo-img-wrapper" style="padding: 0; border: none; overflow: hidden; border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
+          <img src="assets/images/Offer.jpg" alt="عرض العرائس والصحاب - CELIA PINK" style="width: 100%; height: 100%; object-fit: cover; display: block; border-radius: var(--radius-lg);">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       9. Customer Reviews Section (آراء البنات المصريات)
+       ========================================== -->
+  <section class="reviews-section" id="reviewsSection">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">ريفيوهاتكم اللي بتسعدنا</span>
+        <h2 class="section-title">آراء الجميلات في بيجاماتنا 💕</h2>
+        <p class="section-subtitle">كلام حقيقي من عميلات جربوا خاماتنا وتقفيلنا </p>
+      </div>
+
+      <div class="reviews-grid">
+        <!-- Review 1 -->
+        <div class="review-card">
+          <i class="fas fa-quote-right quote-icon"></i>
+          <div class="review-header">
+            <div class="reviewer-avatar">م</div>
+            <div>
+              <h4 class="reviewer-name">ميار عادل</h4>
+              <span class="reviewer-badge"><i class="fas fa-check-circle"></i> التجمع الخامس (القاهرة)</span>
+            </div>
+          </div>
+          <div class="review-stars">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <p class="review-text">
+            "الخامة وهم بجد! الموهير ناعم زي الحرير وبيدفي من غير ما يتقل على الجسم خالص.. والتغليف شياكة موت كأني جايبة هدية لنفسي، تسلم إيديكم يا قمرات 💕"
+          </p>
+        </div>
+
+        <!-- Review 2 -->
+        <div class="review-card">
+          <i class="fas fa-quote-right quote-icon"></i>
+          <div class="review-header">
+            <div class="reviewer-avatar" style="background: linear-gradient(135deg, #FF6584, #FFA8BA);">س</div>
+            <div>
+              <h4 class="reviewer-name">سلمى الشناوي</h4>
+              <span class="reviewer-badge"><i class="fas fa-check-circle"></i> المعادي (القاهرة)</span>
+            </div>
+          </div>
+          <div class="review-stars">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <p class="review-text">
+            "أنا عروسة وكنت مجهزة نص لبس البيت من عندكم.. الموهير طري جداً وبيدفي ومبيوبرش في الغسيل، والمقاس الـ One Size جه مظبوط ومريح بالمللي، والديبوزت دفعته ع انستاباي بسهولة تامة."
+          </p>
+        </div>
+
+        <!-- Review 3 -->
+        <div class="review-card">
+          <i class="fas fa-quote-right quote-icon"></i>
+          <div class="review-header">
+            <div class="reviewer-avatar" style="background: linear-gradient(135deg, #C2185B, #E91E63);">ن</div>
+            <div>
+              <h4 class="reviewer-name">نورهان مصطفى</h4>
+              <span class="reviewer-badge"><i class="fas fa-check-circle"></i> مدينة نصر (القاهرة)</span>
+            </div>
+          </div>
+          <div class="review-stars">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <p class="review-text">
+            "التعامل على الواتساب سكر وزوق لأبعد حد! الأوردر وصلي بعد 48 ساعة بالظبط ، ده أول تعامل وأكيد مش الأخير."
+          </p>
+        </div>
+
+        <!-- Review 4 -->
+        <div class="review-card">
+          <i class="fas fa-quote-right quote-icon"></i>
+          <div class="review-header">
+            <div class="reviewer-avatar" style="background: linear-gradient(135deg, #9C27B0, #E91E63);">ي</div>
+            <div>
+              <h4 class="reviewer-name">ياسمين عبد العزيز</h4>
+              <span class="reviewer-badge"><i class="fas fa-check-circle"></i> الشيخ زايد (الجيزة)</span>
+            </div>
+          </div>
+          <div class="review-stars">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <p class="review-text">
+            "بيجامة الكاروهات بالفيونكات خطييييرة! في اللبس فخمة أوي وكل صحباتي سألوني عنها، والخامة بجد مفهاش غلطة ومستنية الموديلات الجديدة تنزل!"
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       10. WhatsApp Direct Orders Banner (No Plain Number)
+       ========================================== -->
+  <section class="community-section">
+    <div class="container">
+      <div class="community-banner">
+        <div class="community-info">
+          <h3>
+            <i class="fab fa-whatsapp" style="color: var(--whatsapp-green);"></i>
+            اطلبي أوردرك مباشرة وتواصلي معنا عبر الواتساب
+          </h3>
+          <p>
+            فريق خدمة المبيعات متاح طوال اليوم عشان يجاوبك على أي سؤال في المقاسات والألوان، ويأكد حجز أوردرك فوراً! 💬
+          </p>
+        </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <a href="https://wa.me/201505583219" target="_blank" rel="noopener noreferrer" class="btn-whatsapp-join">
+            <i class="fab fa-whatsapp"></i>
+            <span>محادثة واتساب مباشرة للطلب</span>
+          </a>
+          <a href="https://chat.whatsapp.com/CukxGCZ4pzJCHvD8heWL3o?s=sh&p=a&mlu=4&ilr=4" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="border-radius: var(--radius-full); font-weight: 800;">
+            <i class="fas fa-users"></i>
+            <span>جروب العروض الحصرية</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       11. Footer Section
+       ========================================== -->
+  <footer class="site-footer" id="footerSection">
+    <div class="container">
+      <div class="footer-top">
+        <!-- Brand Info -->
+        <div class="footer-brand">
+          <div style="margin-bottom: 12px;">
+            <span class="brand-title" style="font-size: 1.8rem; color: white;">CELIA PINK</span>
+            <span style="display: block; font-size: 0.8rem; color: #FFAEC0;">بيجامات بيتي بناتي ودلع نسائي</span>
+          </div>
+          
+          <!-- Exact statement required by the user -->
+          <div class="footer-required-statement">
+            <i class="fas fa-heart"></i> نحن متجر أونلاين لتلبية احتياجاتك
+          </div>
+
+          <p class="footer-desc">
+            متجر إلكتروني مصري متخصص في بيجامات النساء والدلع البيتي.. خامات ممتازة وأسعار مناسبة مع توصيل لكافة محافظات مصر وطرق دفع مريحة وآمنة.
+          </p>
+
+          <div class="footer-social">
+            <a href="https://wa.me/201505583219" target="_blank" rel="noopener noreferrer" class="social-link" title="واتساب"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://chat.whatsapp.com/CukxGCZ4pzJCHvD8heWL3o?s=sh&p=a&mlu=4&ilr=4" target="_blank" rel="noopener noreferrer" class="social-link" title="جروب الواتساب"><i class="fas fa-users"></i></a>
+            <a href="#" class="social-link" title="إنستغرام"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="social-link" title="تيك توك"><i class="fab fa-tiktok"></i></a>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h4 class="footer-heading">أقسام البيجامات</h4>
+          <ul class="footer-links">
+            <li><a href="#home">الصفحة الرئيسية</a></li>
+            <li><a href="#productsSection">موهير بيتي دلع</a></li>
+            <li><a href="#productsSection">بيجامات كلاسيك زراير</a></li>
+            <li><a href="#productsSection">كاروهات وتريند</a></li>
+            <li><a href="#productsSection">فرو ومخمل شتوي</a></li>
+          </ul>
+        </div>
+
+        <!-- Payment & Policies -->
+        <div>
+          <h4 class="footer-heading">الدفع والسياسات</h4>
+          <ul class="footer-links">
+            <li><a href="#paymentSection">دفع انستاباي وفودافون كاش</a></li>
+            <li><a href="#paymentSection">تفاصيل ديبوزت جدية الحجز</a></li>
+            <li><a href="#">شحن مجاني فوق 1000 جنيه</a></li>
+            <li><a href="#">سياسة المعاينة والاستبدال</a></li>
+            <li><a href="https://wa.me/201505583219" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp" style="color: var(--whatsapp-green);"></i> خدمة العملاء على الواتساب</a></li>
+          </ul>
+        </div>
+
+        <!-- Newsletter & Payment Badges -->
+        <div class="footer-newsletter">
+          <h4 class="footer-heading">انضمي لعالم سيليا الوردي</h4>
+          <p>سيبي رقمك عشان يوصلك جديد كولكشنات البيجامات والخصومات السرية على الواتساب:</p>
+          <form class="newsletter-form" onsubmit="event.preventDefault(); alert('شكراً ليكي يا قمر! نورتي عيلة CELIA PINK 💕');">
+            <input type="email" class="newsletter-input" placeholder="اكتبي الواتساب..." required>
+            <button type="submit" class="newsletter-btn">إرسال</button>
+          </form>
+
+          <h5 style="font-size: 0.85rem; color: #FFAEC0; margin-top: 15px; font-weight: 700;">وسائل الدفع المقبولة:</h5>
+          <div class="payment-badges">
+            <span class="payment-pill"><i class="fas fa-bolt"></i> انستاباي InstaPay</span>
+            <span class="payment-pill"><i class="fas fa-mobile-screen"></i> فودافون كاش</span>
+            <span class="payment-pill"><i class="fas fa-wallet"></i> اتصالات كاش</span>
+            <span class="payment-pill"><i class="fas fa-hand-holding-dollar"></i> عند الاستلام (مع ديبوزت)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Bottom -->
+      <div class="footer-bottom">
+        <div>
+          جميع الحقوق محفوظة &copy; 2026 <strong>CELIA PINK</strong> | متجر بيجامات نسائية أونلاين في مصر
+        </div>
+        <div style="display: flex; gap: 15px;">
+          <span>معمول بكل حب ورقة لبنات مصر 💕</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==========================================
+       12. Floating WhatsApp Button & Popup Menu (No Plain Phone Number)
+       ========================================== -->
+  <div class="whatsapp-float-container">
+    <!-- WhatsApp Dual Action Popup Menu -->
+    <div class="whatsapp-menu-popup" id="whatsappMenuPopup">
+      <div class="whatsapp-menu-header">
+        <i class="fab fa-whatsapp" style="color: var(--whatsapp-green);"></i>
+        <span>تواصل مع CELIA PINK</span>
+      </div>
+      <a href="https://wa.me/201505583219" target="_blank" rel="noopener noreferrer" class="whatsapp-menu-link">
+        <i class="fas fa-comment-dots"></i>
+        <div>
+          <div>شات مباشر للطلبات والأوردرات</div>
+          <span style="font-size: 0.74rem; color: var(--text-muted);">اضغطي هنا لبدء المحادثة فوراً</span>
+        </div>
+      </a>
+      <a href="https://chat.whatsapp.com/CukxGCZ4pzJCHvD8heWL3o?s=sh&p=a&mlu=4&ilr=4" target="_blank" rel="noopener noreferrer" class="whatsapp-menu-link">
+        <i class="fas fa-users"></i>
+        <div>
+          <div>جروب الواتساب للعروض الخاصة</div>
+          <span style="font-size: 0.74rem; color: var(--text-muted);">خصومات حصرية للبنات</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="whatsapp-float-tooltip">
+      <span>إتفضلي بالطلب أو الانضمام للجروب! 💬</span>
+    </div>
+
+    <button id="whatsappFloatingBtn" class="whatsapp-float-btn" title="تواصل مباشر عبر الواتساب">
+      <i class="fab fa-whatsapp"></i>
+      <div class="whatsapp-ping-circle"></div>
+    </button>
+  </div>
+
+  <!-- Scroll to Top Button -->
+  <button class="scroll-top-btn" id="scrollTopBtn" title="الرجوع للأعلى">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <!-- ==========================================
+       13. Shopping Cart Drawer
+       ========================================== -->
+  <div class="cart-overlay" id="cartOverlay">
+    <div class="cart-drawer">
+      <div class="cart-header">
+        <h3 class="cart-title">
+          <i class="fas fa-shopping-bag" style="color: var(--primary-pink);"></i>
+          <span>سلة بيجاماتك 🌸</span>
+        </h3>
+        <button class="close-cart-btn" id="closeCartBtn">&times;</button>
+      </div>
+
+      <!-- Free shipping progress indicator (1000 EGP) -->
+      <div class="free-shipping-progress">
+        <div class="progress-text" id="freeShippingText">
+          <span>اطلبي بـ 1000 جنيه أو أكتر وتاخدي شحن مجاني لأي مكان!</span>
+          <span>0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="freeShippingProgress" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Items List -->
+      <div class="cart-items-list" id="cartItemsList"></div>
+
+      <!-- Cart Footer & Summary -->
+      <div class="cart-footer">
+        <!-- Discount Code Buttons -->
+        <div class="coupon-btns-label">🎁 استخدمي كود خصمك حسب عدد القطع في سلتك:</div>
+        <div class="coupon-btns-grid" id="couponBtnsGrid">
+          <button class="coupon-btn" id="couponBtn10" onclick="applyCouponCode('CELIA10')" title="خصم 10% عند 3 قطع أو أكتر">
+            <span class="coupon-btn-code">CELIA10</span>
+            <span class="coupon-btn-desc">10% خصم • من 3 قطع</span>
+          </button>
+          <button class="coupon-btn" id="couponBtn15" onclick="applyCouponCode('CELIA15')" title="خصم 15% عند 6 قطع أو أكتر">
+            <span class="coupon-btn-code">CELIA15</span>
+            <span class="coupon-btn-desc">15% خصم • من 6 قطع</span>
+          </button>
+          <button class="coupon-btn" id="couponBtn20" onclick="applyCouponCode('CELIA20')" title="خصم 20% عند 9 قطع أو أكتر">
+            <span class="coupon-btn-code">CELIA20</span>
+            <span class="coupon-btn-desc">20% خصم • من 9 قطع</span>
+          </button>
+          <button class="coupon-btn" id="couponBtn24" onclick="applyCouponCode('3AROSA24')" title="خصم 24% عند 12 قطعة أو أكتر">
+            <span class="coupon-btn-code">3AROSA24</span>
+            <span class="coupon-btn-desc">24% خصم • من 12 قطعة</span>
+          </button>
+        </div>
+
+        <div class="cart-summary-row">
+          <span>المجموع الفرعي:</span>
+          <span id="cartSubtotal">0 ج.م</span>
+        </div>
+
+        <div class="cart-summary-row" id="cartDiscountRow" style="display: none; color: #16A34A;">
+          <span>الخصم المطبق:</span>
+          <span id="cartDiscount">0 ج.م</span>
+        </div>
+
+        <div class="cart-summary-row">
+          <span>قيمة الشحن:</span>
+          <span id="cartShipping">شحن مجاني فوق 1000 ج</span>
+        </div>
+
+        <div class="cart-summary-total">
+          <span>الإجمالي النهائي:</span>
+          <span id="cartTotal">0 ج.م</span>
+        </div>
+
+        <div class="cart-checkout-actions">
+          <button class="btn-cart-whatsapp" id="whatsappCheckoutBtn">
+            <i class="fab fa-whatsapp"></i>
+            <span>تأكيد الأوردر ومحادثة خدمة العملاء على الواتساب 💬</span>
+          </button>
+          <div style="font-size: 0.76rem; color: var(--text-muted); text-align: center; margin-top: 4px;">
+            ⚠️ سيتم تحويل ديبوزت رمزي (100 ج) لتأكيد جدية الحجز والباقي عند الاستلام.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       14. Quick View Modal
+       ========================================== -->
+  <div class="modal-overlay" id="quickViewModal">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="closeQuickViewBtn">&times;</button>
+      <div id="quickViewContent"></div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       15. Toast Notifications Container
+       ========================================== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Supabase & App JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/supabase-config.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
