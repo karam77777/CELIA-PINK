@@ -703,13 +703,16 @@ let appliedDiscountCode = ''; // current active coupon code
   }
 
   // Category Filter Tabs
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderProducts(btn.dataset.filter);
-    };
-  });
+  function bindCategoryFilters() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderProducts(btn.dataset.filter);
+      };
+    });
+  }
+  bindCategoryFilters();
 
   // Category Cards
   document.querySelectorAll('.category-card').forEach(card => {
@@ -1207,6 +1210,138 @@ let appliedDiscountCode = ''; // current active coupon code
     }
 
     renderReviews(reviewsList);
+    initReviewsCarouselNav();
+  }
+
+  // ==========================================
+  // 17. Reviews Carousel Navigation & Smooth Scroll
+  // ==========================================
+  function initReviewsCarouselNav() {
+    const track = document.getElementById('reviewsGrid');
+    const prevBtn = document.getElementById('reviewsPrevBtn');
+    const nextBtn = document.getElementById('reviewsNextBtn');
+    if (!track || !prevBtn || !nextBtn) return;
+
+    const getScrollStep = () => {
+      const card = track.querySelector('.review-card');
+      return card ? card.offsetWidth + 22 : 350;
+    };
+
+    prevBtn.onclick = () => {
+      // In RTL Arabic layout, prev button is on the right, scrolls rightwards
+      track.scrollBy({ left: getScrollStep(), behavior: 'smooth' });
+    };
+
+    nextBtn.onclick = () => {
+      // In RTL Arabic layout, next button is on the left, scrolls leftwards
+      track.scrollBy({ left: -getScrollStep(), behavior: 'smooth' });
+    };
+
+    // Touch / Mouse grab scroll helper
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+
+    track.onmousedown = (e) => {
+      isDown = true;
+      track.style.cursor = 'grabbing';
+      startX = e.pageX - track.offsetLeft;
+      scrollLeft = track.scrollLeft;
+    };
+
+    window.addEventListener('mouseup', () => {
+      if (!isDown) return;
+      isDown = false;
+      track.style.cursor = 'grab';
+    });
+
+    track.onmousemove = (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - track.offsetLeft;
+      const walk = (x - startX) * 1.5;
+      track.scrollLeft = scrollLeft - walk;
+    };
+  }
+
+  // ==========================================
+  // 18. Live Categories Sync from Supabase
+  // ==========================================
+  async function loadCategoriesFromSupabase() {
+    try {
+      if (typeof isSupabaseReady === 'function' && isSupabaseReady()) {
+        const { data, error } = await supabaseClient
+          .from('categories')
+          .select('*')
+          .order('id', { ascending: true });
+
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const nav = document.getElementById('categoryFilterNav');
+          if (nav) {
+            const activeFilter = getCurrentCategoryFilter();
+            nav.innerHTML = `<button class="filter-btn ${activeFilter === 'all' ? 'active' : ''}" data-filter="all">كل البيجامات</button>` +
+              data.map(c => 
+                `<button class="filter-btn ${activeFilter === c.slug ? 'active' : ''}" data-filter="${c.slug}">${c.name}</button>`
+              ).join('');
+            bindCategoryFilters();
+          }
+        }
+      }
+    } catch(e) {
+      console.warn('Categories sync:', e);
+    }
+  }
+
+  // ==========================================
+  // 19. Supabase Presence (Live Visitors Tracking)
+  // ==========================================
+  function initVisitorPresence() {
+    try {
+      if (typeof isSupabaseReady === 'function' && isSupabaseReady()) {
+        const visitorChannel = supabaseClient.channel('site_presence', {
+          config: {
+            presence: { key: 'vis_' + Math.random().toString(36).substring(2, 9) }
+          }
+        });
+        visitorChannel.subscribe(async (status) => {
+          if (status === 'SUBSCRIBED') {
+            await visitorChannel.track({
+              role: 'visitor',
+              online_at: new Date().toISOString()
+            });
+          }
+        });
+      }
+    } catch(e) {
+      console.warn('Visitor presence:', e);
+    }
+  }
+
+  // ==========================================
+  // 20. Total Cumulative Visits Counter
+  // ==========================================
+  async function recordSiteVisit() {
+    try {
+      if (sessionStorage.getItem('celia_visit_counted')) return;
+      if (typeof isSupabaseReady === 'function' && isSupabaseReady()) {
+        const { data } = await supabaseClient
+          .from('site_stats')
+          .select('value')
+          .eq('key', 'total_visits')
+          .single();
+
+        if (data) {
+          const currentCount = parseInt(data.value, 10) || 0;
+          await supabaseClient
+            .from('site_stats')
+            .update({ value: currentCount + 1, updated_at: new Date().toISOString() })
+            .eq('key', 'total_visits');
+          sessionStorage.setItem('celia_visit_counted', '1');
+        }
+      }
+    } catch(e) {
+      console.warn('Record visit:', e);
+    }
   }
 
   window.handleReviewSubmit = async function(e) {
@@ -1246,8 +1381,12 @@ let appliedDiscountCode = ''; // current active coupon code
 
   // Initialize
   loadProductsFromSupabase();  // async: renders products after cloud fetch
+  loadCategoriesFromSupabase();
   updateWishlistUI();
   initStarSelector();
   loadReviewsFromSupabase();
+  initReviewsCarouselNav();
+  initVisitorPresence();
+  recordSiteVisit();
 });
 

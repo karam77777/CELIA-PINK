@@ -83,6 +83,19 @@
     .stat-num { font-size: 2rem; font-weight: 900; color: var(--pink); }
     .stat-label { font-size: 0.82rem; color: var(--gray); margin-top: 4px; font-weight: 600; }
 
+    .live-dot {
+      width: 10px; height: 10px; background-color: #10B981;
+      border-radius: 50%; display: inline-block;
+      box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      animation: livePulse 1.8s infinite;
+      margin-left: 6px;
+    }
+    @keyframes livePulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
     /* Section header */
     .section-bar {
       display: flex; align-items: center; justify-content: space-between;
@@ -284,25 +297,31 @@
   <div class="admin-body">
     <!-- Stats -->
     <div class="stats-row" id="statsRow">
+      <div class="stat-card" style="border: 2px solid #A7F3D0; background: #ECFDF5;">
+        <div class="stat-num" id="statLiveVisitors" style="color:#059669; display:flex; align-items:center; justify-content:center;">
+          <span class="live-dot"></span> <span id="statLiveCount">1</span>
+        </div>
+        <div class="stat-label" style="color:#047857; font-weight:800;">🟢 متواجدين الآن بالموقع</div>
+      </div>
+      <div class="stat-card" style="border: 2px solid #C7D2FE; background: #EEF2FF;">
+        <div class="stat-num" id="statTotalVisits" style="color:#4F46E5;">158</div>
+        <div class="stat-label" style="color:#4338CA; font-weight:800;">👁️ إجمالي الزيارات التراكمية</div>
+      </div>
       <div class="stat-card">
         <div class="stat-num" id="statTotal">0</div>
         <div class="stat-label">إجمالي المنتجات</div>
       </div>
+      <div class="stat-card" onclick="switchAdminTab('categories')" style="cursor:pointer;" title="اضغطي لإدارة الأقسام">
+        <div class="stat-num" id="statCats" style="color:var(--pink);">0</div>
+        <div class="stat-label">📁 أقسام المنتجات</div>
+      </div>
+      <div class="stat-card" onclick="switchAdminTab('reviews')" style="cursor:pointer;" title="اضغطي لإدارة الآراء">
+        <div class="stat-num" id="statReviews" style="color:var(--deep-pink);">0</div>
+        <div class="stat-label">💬 آراء وتقييمات العملاء</div>
+      </div>
       <div class="stat-card">
         <div class="stat-num" id="statPrice">250 ج</div>
         <div class="stat-label">سعر البيجامة الثابت</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="statCats">0</div>
-        <div class="stat-label">أقسام مختلفة</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="statReviews" style="color:var(--deep-pink);">0</div>
-        <div class="stat-label">آراء وتقييمات العملاء</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" style="color:var(--green);">1000 ج</div>
-        <div class="stat-label">حد الشحن المجاني</div>
       </div>
     </div>
 
@@ -311,6 +330,10 @@
       <button class="tab-btn active" id="tabBtnProducts" onclick="switchAdminTab('products')">
         <i class="fas fa-boxes"></i> <span>إدارة المنتجات</span>
         <span class="tab-badge" id="tabBadgeProducts">0</span>
+      </button>
+      <button class="tab-btn" id="tabBtnCategories" onclick="switchAdminTab('categories')">
+        <i class="fas fa-layer-group"></i> <span>إدارة الأقسام</span>
+        <span class="tab-badge" id="tabBadgeCategories">0</span>
       </button>
       <button class="tab-btn" id="tabBtnReviews" onclick="switchAdminTab('reviews')">
         <i class="fas fa-comments"></i> <span>آراء وتقييمات العملاء</span>
@@ -333,10 +356,6 @@
           placeholder="🔍 ابحثي عن منتج..." oninput="renderTable()">
         <select class="filter-select" id="filterCat" onchange="renderTable()">
           <option value="all">كل الأقسام</option>
-          <option value="cotton">موهير بيتي دلع</option>
-          <option value="classic">بيجامات كلاسيك زراير</option>
-          <option value="plaid">كاروهات وتريند</option>
-          <option value="winter">فرو ومخمل شتوي</option>
         </select>
       </div>
 
@@ -359,7 +378,38 @@
       </div>
     </div>
 
-    <!-- ===== 2. REVIEWS MANAGEMENT SECTION ===== -->
+    <!-- ===== 2. CATEGORIES MANAGEMENT SECTION ===== -->
+    <div id="categoriesSectionWrapper" style="display: none;">
+      <div class="section-bar">
+        <div>
+          <h2><i class="fas fa-layer-group" style="color:var(--pink);"></i> إدارة أقسام المتجر</h2>
+          <span style="font-size:0.84rem; color:var(--gray); font-weight:600; display:block; margin-top:4px;">
+            💡 أضيفي، عدّلي، أو احذفي الأقسام لتنظيم المنتجات وظهورها بالقائمة المنسدلة وفلاتر المتجر
+          </span>
+        </div>
+        <button class="btn-add" onclick="openAddCategoryModal()">
+          <i class="fas fa-plus"></i> إضافة قسم جديد
+        </button>
+      </div>
+
+      <!-- Categories Table -->
+      <div class="table-wrap">
+        <table class="products-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>اسم القسم</th>
+              <th>معرّف القسم (Slug)</th>
+              <th>عدد المنتجات بالقسم</th>
+              <th>الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="categoriesTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== 3. REVIEWS MANAGEMENT SECTION ===== -->
     <div id="reviewsSectionWrapper" style="display: none;">
       <div class="section-bar">
         <div>
@@ -397,7 +447,7 @@
   </div>
 </div>
 
-<!-- ===== ADD / EDIT MODAL ===== -->
+<!-- ===== ADD / EDIT PRODUCT MODAL ===== -->
 <div class="modal-overlay" id="productModal">
   <div class="modal-card">
     <button class="modal-close" onclick="closeModal()">×</button>
@@ -408,13 +458,8 @@
       <input type="text" id="fTitle" placeholder="مثال: بيجامة ستان وردي مع فيونكات">
     </div>
     <div class="field">
-      <label>القسم *</label>
-      <select id="fCategory">
-        <option value="cotton">موهير بيتي دلع</option>
-        <option value="classic">بيجامات كلاسيك زراير</option>
-        <option value="plaid">كاروهات وتريند</option>
-        <option value="winter">فرو ومخمل شتوي</option>
-      </select>
+      <label>القسم (اختاري من الأقسام المتاحة) *</label>
+      <select id="fCategory"></select>
     </div>
     <div class="field">
       <label>السعر (ج.م) *</label>
@@ -472,6 +517,33 @@
       <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
       <button class="btn-save" onclick="saveProduct()">
         <i class="fas fa-save"></i> حفظ المنتج
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADD / EDIT CATEGORY MODAL ===== -->
+<div class="modal-overlay" id="categoryModal">
+  <div class="modal-card" style="max-width: 480px;">
+    <button class="modal-close" onclick="closeCategoryModal()">×</button>
+    <h3 id="categoryModalTitle">إضافة قسم جديد 🌸</h3>
+
+    <div class="field">
+      <label>اسم القسم (بالعربي) *</label>
+      <input type="text" id="fCatName" placeholder="مثال: أرواب ستان عرايس" oninput="autoGenerateCatSlug()">
+    </div>
+    <div class="field">
+      <label>معرّف القسم بالإنجليزية (Slug) *</label>
+      <input type="text" id="fCatSlug" placeholder="مثال: robes">
+      <small style="color:var(--gray); font-size:0.78rem; display:block; margin-top:4px;">
+        💡 يُستخدم للربط التقني (حروف إنجليزية صغيرة بدون مسافات، مثال: cotton, classic, robes)
+      </small>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeCategoryModal()">إلغاء</button>
+      <button class="btn-save" onclick="saveCategory()">
+        <i class="fas fa-save"></i> حفظ القسم
       </button>
     </div>
   </div>

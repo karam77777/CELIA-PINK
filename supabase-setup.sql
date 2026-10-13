@@ -89,3 +89,56 @@ INSERT INTO reviews (name, city, rating, comment) VALUES
 ('سلمى الشناوي', 'المعادي (القاهرة)', 5, 'أنا عروسة وكنت مجهزة نص لبس البيت من عندكم.. الموهير طري جداً وبيدفي ومبيوبرش في الغسيل، والمقاس الـ One Size جه مظبوط ومريح بالمللي، والديبوزت دفعته ع انستاباي بسهولة تامة.'),
 ('نورهان مصطفى', 'مدينة نصر (القاهرة)', 5, 'التعامل على الواتساب سكر وزوق لأبعد حد! الأوردر وصلي بعد 48 ساعة بالظبط ، ده أول تعامل وأكيد مش الأخير.'),
 ('ياسمين عبد العزيز', 'الشيخ زايد (الجيزة)', 5, 'بيجامة الكاروهات بالفيونكات خطييييرة! في اللبس فخمة أوي وكل صحباتي سألوني عنها، والخامة بجد مفهاش غلطة ومستنية الموديلات الجديدة تنزل!');
+
+-- ====================================================
+-- 6. جدول الأقسام (Categories Table)
+-- ====================================================
+CREATE TABLE IF NOT EXISTS categories (
+  id          BIGSERIAL PRIMARY KEY,
+  slug        TEXT UNIQUE NOT NULL,
+  name        TEXT NOT NULL,
+  icon        TEXT DEFAULT 'fas fa-tshirt',
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read categories" ON categories;
+CREATE POLICY "Allow public read categories" ON categories
+  FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow anon manage categories" ON categories;
+CREATE POLICY "Allow anon manage categories" ON categories
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- إدخال الأقسام الأساسية
+INSERT INTO categories (slug, name, icon) VALUES
+  ('cotton', 'موهير بيتي دلع', 'fas fa-feather-alt'),
+  ('classic', 'بيجامات كلاسيك زراير', 'fas fa-crown'),
+  ('plaid', 'كاروهات وتريند', 'fas fa-star'),
+  ('winter', 'فرو ومخمل شتوي', 'fas fa-snowflake')
+ON CONFLICT (slug) DO NOTHING;
+
+-- ====================================================
+-- 7. جدول إحصائيات وزيارات الموقع (Site Stats Table)
+-- ====================================================
+CREATE TABLE IF NOT EXISTS site_stats (
+  key         TEXT PRIMARY KEY,
+  value       BIGINT NOT NULL DEFAULT 0,
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE site_stats ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read site_stats" ON site_stats;
+CREATE POLICY "Allow public read site_stats" ON site_stats
+  FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow anon manage site_stats" ON site_stats;
+CREATE POLICY "Allow anon manage site_stats" ON site_stats
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- القيمة الافتراضية للزيارات
+INSERT INTO site_stats (key, value) VALUES ('total_visits', 158)
+ON CONFLICT (key) DO NOTHING;
+

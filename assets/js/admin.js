@@ -13,22 +13,31 @@ const ADMIN_CREDENTIALS = {
 const AUTH_KEY = 'celia_admin_auth';
 
 // ==========================================
-// Category map
+// Category State & Defaults
 // ==========================================
-const CAT_NAMES = {
-  cotton:  'موهير بيتي دلع',
-  classic: 'بيجامات كلاسيك زراير',
-  plaid:   'كاروهات وتريند',
-  winter:  'فرو ومخمل شتوي'
-};
+const DEFAULT_CATEGORIES = [
+  { id: 1, slug: 'cotton',  name: 'موهير بيتي دلع',      icon: 'fas fa-feather-alt' },
+  { id: 2, slug: 'classic', name: 'بيجامات كلاسيك زراير', icon: 'fas fa-crown' },
+  { id: 3, slug: 'plaid',   name: 'كاروهات وتريند',      icon: 'fas fa-star' },
+  { id: 4, slug: 'winter',  name: 'فرو ومخمل شتوي',      icon: 'fas fa-snowflake' }
+];
+
+// Quick lookup fallback
+function getCategoryName(slug) {
+  const found = categories.find(c => c.slug === slug);
+  return found ? found.name : slug;
+}
 
 // ==========================================
 // State
 // ==========================================
-let products   = [];
-let reviews    = [];
-let editingId  = null;
+let products     = [];
+let categories   = [...DEFAULT_CATEGORIES];
+let reviews      = [];
+let editingId    = null;
+let editingCatId = null;
 let deleteTarget = { type: 'product', id: null };
+let adminPresenceChannel = null;
 
 // ==========================================
 // DB helpers (Supabase)
@@ -72,6 +81,50 @@ async function dbDeleteProduct(id) {
   if (error) throw error;
 }
 
+// Categories DB Helpers
+async function dbFetchCategories() {
+  if (!isSupabaseReady()) return DEFAULT_CATEGORIES;
+  try {
+    const { data, error } = await supabaseClient
+      .from('categories')
+      .select('*')
+      .order('id', { ascending: true });
+    if (error) {
+      console.warn('Categories fetch error:', error.message);
+      return DEFAULT_CATEGORIES;
+    }
+    return (data && data.length > 0) ? data : DEFAULT_CATEGORIES;
+  } catch(e) {
+    return DEFAULT_CATEGORIES;
+  }
+}
+
+async function dbInsertCategory(row) {
+  const { data, error } = await supabaseClient
+    .from('categories')
+    .insert([row])
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+async function dbUpdateCategory(id, row) {
+  const { error } = await supabaseClient
+    .from('categories')
+    .update(row)
+    .eq('id', id);
+  if (error) throw error;
+}
+
+async function dbDeleteCategory(id) {
+  const { error } = await supabaseClient
+    .from('categories')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
+}
+
 // Reviews DB Helpers
 async function dbFetchReviews() {
   if (!isSupabaseReady()) return [];
@@ -98,6 +151,51 @@ async function dbDeleteReview(id) {
   if (error) throw error;
 }
 
+// Site Stats & Presence Helpers
+async function loadSiteStats() {
+  try {
+    if (!isSupabaseReady()) return;
+    const { data, error } = await supabaseClient
+      .from('site_stats')
+      .select('value')
+      .eq('key', 'total_visits')
+      .single();
+    if (!error && data && document.getElementById('statTotalVisits')) {
+      document.getElementById('statTotalVisits').textContent = Number(data.value).toLocaleString('ar-EG');
+    }
+  } catch(e) {
+    console.warn('Could not load site stats:', e);
+  }
+}
+
+function initPresenceMonitoring() {
+  if (!isSupabaseReady()) return;
+  if (adminPresenceChannel) {
+    try { supabaseClient.removeChannel(adminPresenceChannel); } catch(e){}
+  }
+
+  try {
+    adminPresenceChannel = supabaseClient.channel('site_presence');
+    adminPresenceChannel
+      .on('presence', { event: 'sync' }, () => {
+        const state = adminPresenceChannel.presenceState();
+        const count = Object.keys(state).length;
+        const el = document.getElementById('statLiveCount');
+        if (el) el.textContent = Math.max(1, count);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await adminPresenceChannel.track({
+            role: 'admin',
+            online_at: new Date().toISOString()
+          });
+        }
+      });
+  } catch(e) {
+    console.warn('Presence init:', e);
+  }
+}
+
 // ==========================================
 // Auth
 // ==========================================
@@ -114,6 +212,9 @@ function doLogin() {
 
 function doLogout() {
   sessionStorage.removeItem(AUTH_KEY);
+  if (adminPresenceChannel) {
+    try { supabaseClient.removeChannel(adminPresenceChannel); } catch(e){}
+  }
   document.getElementById('adminPanel').style.display  = 'none';
   document.getElementById('loginPage').style.display   = 'flex';
   document.getElementById('loginUser').value = '';
@@ -124,8 +225,11 @@ function doLogout() {
 function showAdminPanel() {
   document.getElementById('loginPage').style.display  = 'none';
   document.getElementById('adminPanel').style.display = 'block';
+  loadCategories();
   loadProducts();
   loadReviews();
+  loadSiteStats();
+  initPresenceMonitoring();
 }
 
 document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
@@ -144,7 +248,7 @@ async function loadProducts() {
 
 function showTableLoading(on) {
   const tb = document.getElementById('productsTableBody');
-  if (on) {
+  if (tb && on) {
     tb.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--gray);">
       <i class="fas fa-spinner fa-spin" style="font-size:1.8rem;color:var(--petal);"></i>
       <p style="margin-top:12px;">جاري تحميل المنتجات...</p>
@@ -153,21 +257,166 @@ function showTableLoading(on) {
 }
 
 // ==========================================
+// Categories Management
+// ==========================================
+async function loadCategories() {
+  categories = await dbFetchCategories();
+  populateCategorySelects();
+  updateStats();
+  renderCategoriesTable();
+}
+
+function populateCategorySelects() {
+  const fCategory = document.getElementById('fCategory');
+  const filterCat = document.getElementById('filterCat');
+
+  if (fCategory) {
+    const currentVal = fCategory.value;
+    fCategory.innerHTML = categories.map(c => 
+      `<option value="${c.slug}">${c.name}</option>`
+    ).join('');
+    if (currentVal && categories.some(c => c.slug === currentVal)) {
+      fCategory.value = currentVal;
+    }
+  }
+
+  if (filterCat) {
+    const currentFilter = filterCat.value || 'all';
+    filterCat.innerHTML = `<option value="all">كل الأقسام</option>` +
+      categories.map(c => `<option value="${c.slug}">${c.name}</option>`).join('');
+    if (currentFilter && (currentFilter === 'all' || categories.some(c => c.slug === currentFilter))) {
+      filterCat.value = currentFilter;
+    }
+  }
+}
+
+window.renderCategoriesTable = function() {
+  const tbody = document.getElementById('categoriesTableBody');
+  if (!tbody) return;
+
+  if (categories.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><i class="fas fa-layer-group"></i><p>لا توجد أقسام مسجلة 🌸</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = categories.map((c, i) => {
+    const prodCount = products.filter(p => p.category === c.slug).length;
+    return `
+      <tr>
+        <td style="color:var(--gray);font-size:0.82rem;">${i + 1}</td>
+        <td style="font-weight:700;">${c.name}</td>
+        <td><span class="badge-cat" style="font-family:monospace;">${c.slug}</span></td>
+        <td><strong>${prodCount}</strong> منتج</td>
+        <td style="white-space:nowrap;">
+          <button class="btn-edit" onclick="openEditCategoryModal(${c.id})">
+            <i class="fas fa-pen"></i> تعديل
+          </button>
+          <button class="btn-delete" onclick="openDeleteCategoryModal(${c.id})">
+            <i class="fas fa-trash-alt"></i> حذف
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
+
+window.openAddCategoryModal = function() {
+  editingCatId = null;
+  document.getElementById('categoryModalTitle').textContent = 'إضافة قسم جديد 🌸';
+  document.getElementById('fCatName').value = '';
+  document.getElementById('fCatSlug').value = '';
+  document.getElementById('categoryModal').classList.add('open');
+};
+
+window.openEditCategoryModal = function(id) {
+  const cat = categories.find(c => c.id === id);
+  if (!cat) return;
+  editingCatId = id;
+  document.getElementById('categoryModalTitle').textContent = 'تعديل القسم';
+  document.getElementById('fCatName').value = cat.name;
+  document.getElementById('fCatSlug').value = cat.slug;
+  document.getElementById('categoryModal').classList.add('open');
+};
+
+window.closeCategoryModal = function() {
+  document.getElementById('categoryModal').classList.remove('open');
+  editingCatId = null;
+};
+
+window.autoGenerateCatSlug = function() {
+  if (editingCatId) return;
+  const name = document.getElementById('fCatName').value.trim();
+  const slugInput = document.getElementById('fCatSlug');
+  if (!slugInput) return;
+  const latin = name.toLowerCase()
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  if (latin) {
+    slugInput.value = latin;
+  } else if (!slugInput.value) {
+    // If arabic only and no slug typed yet, suggest 'cat-' + timestamp
+    slugInput.placeholder = 'مثال: category-' + Math.floor(Math.random() * 100);
+  }
+};
+
+window.saveCategory = async function() {
+  const name = document.getElementById('fCatName').value.trim();
+  let slug = document.getElementById('fCatSlug').value.trim().toLowerCase();
+
+  if (!name) {
+    adminToast('❌ اكتبي اسم القسم الأول!', 'error');
+    document.getElementById('fCatName').focus();
+    return;
+  }
+
+  if (!slug) {
+    slug = 'cat-' + Date.now().toString(36);
+  }
+
+  slug = slug.replace(/\s+/g, '-').replace(/[^a-z0-9-_]/g, '');
+
+  const saveBtn = document.querySelector('#categoryModal .btn-save');
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+
+  try {
+    if (editingCatId !== null) {
+      await dbUpdateCategory(editingCatId, { name, slug });
+      adminToast('✅ تم تعديل القسم بنجاح!', 'success');
+    } else {
+      await dbInsertCategory({ name, slug });
+      adminToast('🎉 تم إضافة القسم الجديد بنجاح!', 'success');
+    }
+    closeCategoryModal();
+    await loadCategories();
+    renderTable();
+  } catch(err) {
+    adminToast('❌ خطأ في حفظ القسم: ' + err.message, 'error');
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.innerHTML = '<i class="fas fa-save"></i> حفظ القسم';
+  }
+};
+
+// ==========================================
 // Stats
 // ==========================================
 function updateStats() {
   const statTotal = document.getElementById('statTotal');
   if (statTotal) statTotal.textContent = products.length;
 
-  const cats = new Set(products.map(p => p.category));
   const statCats = document.getElementById('statCats');
-  if (statCats) statCats.textContent = cats.size;
+  if (statCats) statCats.textContent = categories.length;
 
   const statReviews = document.getElementById('statReviews');
   if (statReviews) statReviews.textContent = reviews.length;
 
   const tabBadgeProducts = document.getElementById('tabBadgeProducts');
   if (tabBadgeProducts) tabBadgeProducts.textContent = products.length;
+
+  const tabBadgeCategories = document.getElementById('tabBadgeCategories');
+  if (tabBadgeCategories) tabBadgeCategories.textContent = categories.length;
 
   const tabBadgeReviews = document.getElementById('tabBadgeReviews');
   if (tabBadgeReviews) tabBadgeReviews.textContent = reviews.length;
@@ -178,20 +427,23 @@ function updateStats() {
 // ==========================================
 window.switchAdminTab = function(tab) {
   const pWrap = document.getElementById('productsSectionWrapper');
+  const cWrap = document.getElementById('categoriesSectionWrapper');
   const rWrap = document.getElementById('reviewsSectionWrapper');
   const pBtn  = document.getElementById('tabBtnProducts');
+  const cBtn  = document.getElementById('tabBtnCategories');
   const rBtn  = document.getElementById('tabBtnReviews');
 
-  if (tab === 'products') {
-    if (pWrap) pWrap.style.display = 'block';
-    if (rWrap) rWrap.style.display = 'none';
-    if (pBtn) pBtn.classList.add('active');
-    if (rBtn) rBtn.classList.remove('active');
+  if (pWrap) pWrap.style.display = (tab === 'products') ? 'block' : 'none';
+  if (cWrap) cWrap.style.display = (tab === 'categories') ? 'block' : 'none';
+  if (rWrap) rWrap.style.display = (tab === 'reviews') ? 'block' : 'none';
+
+  if (pBtn) pBtn.classList.toggle('active', tab === 'products');
+  if (cBtn) cBtn.classList.toggle('active', tab === 'categories');
+  if (rBtn) rBtn.classList.toggle('active', tab === 'reviews');
+
+  if (tab === 'categories') {
+    loadCategories();
   } else if (tab === 'reviews') {
-    if (pWrap) pWrap.style.display = 'none';
-    if (rWrap) rWrap.style.display = 'block';
-    if (rBtn) rBtn.classList.add('active');
-    if (pBtn) pBtn.classList.remove('active');
     loadReviews();
   }
 };
@@ -294,7 +546,7 @@ function renderTable() {
           : `<div class="prod-img-placeholder"><i class="fas fa-image"></i></div>`}
       </td>
       <td style="font-weight:700;max-width:220px;">${p.title}</td>
-      <td><span class="badge-cat">${p.category_name || CAT_NAMES[p.category] || p.category}</span></td>
+      <td><span class="badge-cat">${p.category_name || getCategoryName(p.category) || p.category}</span></td>
       <td style="font-weight:800;color:var(--deep-pink);">${p.price} ج.م</td>
       <td>⭐ ${p.rating}</td>
       <td style="white-space:nowrap;">
@@ -325,7 +577,7 @@ function openEditModal(id) {
   editingId = id;
   document.getElementById('modalTitle').textContent   = 'تعديل المنتج';
   document.getElementById('fTitle').value             = p.title       || '';
-  document.getElementById('fCategory').value          = p.category    || 'cotton';
+  document.getElementById('fCategory').value          = p.category    || (categories[0]?.slug || 'cotton');
   document.getElementById('fPrice').value             = p.price       || 250;
   document.getElementById('fOldPrice').value          = p.old_price   || 350;
   document.getElementById('fDesc').value              = p.desc        || '';
@@ -346,7 +598,7 @@ function closeModal() {
 
 function clearForm() {
   ['fTitle','fDesc','fImage','fBadge'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('fCategory').value   = 'cotton';
+  document.getElementById('fCategory').value   = categories[0]?.slug || 'cotton';
   document.getElementById('fPrice').value      = 250;
   document.getElementById('fOldPrice').value   = 350;
   document.getElementById('fBadgeType').value  = 'hot';
@@ -382,7 +634,7 @@ function previewImage() {
 
 async function saveProduct() {
   const title      = document.getElementById('fTitle').value.trim();
-  const category   = document.getElementById('fCategory').value;
+  const category   = document.getElementById('fCategory').value || (categories[0]?.slug || 'cotton');
   const price      = parseInt(document.getElementById('fPrice').value)    || 250;
   const old_price  = parseInt(document.getElementById('fOldPrice').value) || 350;
   const desc       = document.getElementById('fDesc').value.trim();
@@ -398,9 +650,11 @@ async function saveProduct() {
     return;
   }
 
+  const category_name = getCategoryName(category);
+
   const row = {
     category,
-    category_name: CAT_NAMES[category] || category,
+    category_name,
     title, price, old_price, desc, image, badge, badge_type,
     rating, reviews_count,
     sizes: ['One Size']
@@ -420,6 +674,8 @@ async function saveProduct() {
     }
     closeModal();
     await loadProducts();
+    updateStats();
+    renderCategoriesTable();
   } catch(err) {
     adminToast('❌ خطأ: ' + err.message, 'error');
   } finally {
@@ -429,7 +685,7 @@ async function saveProduct() {
 }
 
 // ==========================================
-// Delete Operations (Products & Reviews)
+// Delete Operations (Products, Categories & Reviews)
 // ==========================================
 window.openDeleteModal = function(id) {
   deleteTarget = { type: 'product', id };
@@ -437,6 +693,22 @@ window.openDeleteModal = function(id) {
   const text  = document.getElementById('deleteModalText');
   if (title) title.textContent = 'تأكيد حذف المنتج';
   if (text)  text.textContent  = 'هتحذفي المنتج ده من المتجر تماماً. مش هتقدري ترجعيه تاني!';
+  document.getElementById('deleteModal').classList.add('open');
+};
+
+window.openDeleteCategoryModal = function(id) {
+  const cat = categories.find(c => c.id === id);
+  if (!cat) return;
+  const count = products.filter(p => p.category === cat.slug).length;
+  deleteTarget = { type: 'category', id, slug: cat.slug };
+  const title = document.getElementById('deleteModalTitle');
+  const text  = document.getElementById('deleteModalText');
+  if (title) title.textContent = `تأكيد حذف قسم "${cat.name}"`;
+  if (text) {
+    text.textContent = count > 0
+      ? `تحذير: هذا القسم مرتبط بـ ${count} منتج في المتجر! هل أنتِ متأكدة تماماً من حذفه؟`
+      : `هل أنتِ متأكدة من حذف هذا القسم؟ لن يظهر مجدداً في قوائم وفلاتر المتجر.`;
+  }
   document.getElementById('deleteModal').classList.add('open');
 };
 
@@ -466,6 +738,13 @@ async function confirmDelete() {
       closeDeleteModal();
       adminToast('🗑️ تم حذف المنتج بنجاح', 'success');
       await loadProducts();
+      renderCategoriesTable();
+    } else if (deleteTarget.type === 'category') {
+      await dbDeleteCategory(deleteTarget.id);
+      closeDeleteModal();
+      adminToast('🗑️ تم حذف القسم بنجاح', 'success');
+      await loadCategories();
+      renderTable();
     } else if (deleteTarget.type === 'review') {
       await dbDeleteReview(deleteTarget.id);
       closeDeleteModal();
@@ -482,6 +761,7 @@ async function confirmDelete() {
 
 // Close modals on overlay click
 document.getElementById('productModal').addEventListener('click', function(e) { if (e.target===this) closeModal(); });
+document.getElementById('categoryModal')?.addEventListener('click', function(e) { if (e.target===this) closeCategoryModal(); });
 document.getElementById('deleteModal').addEventListener('click',  function(e) { if (e.target===this) closeDeleteModal(); });
 
 // ==========================================

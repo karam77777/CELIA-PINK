@@ -301,7 +301,7 @@
       </div>
 
       <!-- Filter Tabs -->
-      <div class="filter-nav">
+      <div class="filter-nav" id="categoryFilterNav">
         <button class="filter-btn active" data-filter="all">كل البيجامات</button>
         <button class="filter-btn" data-filter="cotton">موهير بيتي دلع</button>
         <button class="filter-btn" data-filter="classic">بيجامات كلاسيك زراير</button>
@@ -482,8 +482,17 @@
         </form>
       </div>
 
-      <!-- Dynamic Reviews Grid (Rendered by app.js from Supabase) -->
-      <div class="reviews-grid" id="reviewsGrid"></div>
+      <!-- Dynamic Reviews Carousel (Rendered by app.js from Supabase) -->
+      <div class="reviews-carousel-wrapper">
+        <button class="reviews-nav-btn reviews-nav-prev" id="reviewsPrevBtn" title="السابق" aria-label="السابق">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        <button class="reviews-nav-btn reviews-nav-next" id="reviewsNextBtn" title="التالي" aria-label="التالي">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+
+        <div class="reviews-carousel-track" id="reviewsGrid"></div>
+      </div>
     </div>
   </section>
 
